@@ -14,6 +14,7 @@ function App() {
   const [users, setUsers] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
   useEffect(() => {
     async function displayAlluser() {
       try {
@@ -31,23 +32,9 @@ function App() {
     setIsEditing(false);
     try {
       if (data._id) {
-        await instance.put(`/api/users/${data._id}`, {
-          name: data.name,
-          email: data.email,
-          dob: data.dob,
-          gender: data.gender,
-          city: data.city,
-          state: data.state,
-        });
+        await instance.put(`/api/users/${data._id}`, data);
       } else {
-        await instance.post("/api/users", {
-          name: data.name,
-          email: data.email,
-          dob: data.dob,
-          gender: data.gender,
-          city: data.city,
-          state: data.state,
-        });
+        await instance.post("/api/users", data);
       }
 
       setData({
@@ -81,16 +68,7 @@ function App() {
       const user = users.find((user) => user._id === id);
       if (user) {
         const formattedDob = new Date(user.dob).toISOString().split("T")[0];
-        setRefresh((prev) => !prev);
-        setData({
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          dob: formattedDob,
-          gender: user.gender,
-          city: user.city,
-          state: user.state,
-        });
+        setData({ ...user, dob: formattedDob });
       }
     } catch (err) {
       console.error(err);
@@ -98,18 +76,20 @@ function App() {
   }
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
+    <div className="app-container">
+      <h1 className="title">User Management System</h1>
+
+      <form className="form-container" onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="enter your name"
+          placeholder="Enter your name"
           value={data.name}
           onChange={(e) => setData({ ...data, name: e.target.value })}
           required
         />
         <input
           type="email"
-          placeholder="enter your email:"
+          placeholder="Enter your email"
           value={data.email}
           onChange={(e) => setData({ ...data, email: e.target.value })}
           required
@@ -126,7 +106,7 @@ function App() {
           required
         >
           <option value="" disabled>
-            Select
+            Select Gender
           </option>
           <option value="male">Male</option>
           <option value="female">Female</option>
@@ -134,47 +114,59 @@ function App() {
         </select>
         <input
           type="text"
-          placeholder="Enter your City"
+          placeholder="Enter your city"
           value={data.city}
           onChange={(e) => setData({ ...data, city: e.target.value })}
           required
         />
         <input
           type="text"
-          placeholder="Enter your State"
+          placeholder="Enter your state"
           value={data.state}
           onChange={(e) => setData({ ...data, state: e.target.value })}
           required
         />
-        {isEditing ? (
-          <button type="submit">Update Data</button>
-        ) : (
-          <button type="submit">Add Data</button>
-        )}
+        <button type="submit" className="submit-btn">
+          {isEditing ? "Update User" : "Add User"}
+        </button>
       </form>
 
-      <ul>
-        {users.map((user) => (
-          <li key={user._id}>
-            {user.name} ({user.email})-{user.gender}, -(
-            {new Date(user.dob).toLocaleDateString("en-US")}), -({user.city}),-
-            ({user.state})
-            <button
-              style={{ margin: "3px" }}
-              onClick={() => handleDelete(user._id)}
-            >
-              Delete
-            </button>
-            <button
-              style={{ margin: "3px" }}
-              onClick={() => handleEdit(user._id)}
-            >
-              Edit
-            </button>
-          </li>
-        ))}
-      </ul>
-    </>
+      <div className="user-list">
+        <h2>All Users</h2>
+        <ul>
+          {users.map((user) => (
+            <li key={user._id} className="user-card">
+              <div className="user-info">
+                <p>
+                  <strong>{user.name}</strong> ({user.email})
+                </p>
+                <p>
+                  {user.gender},{" "}
+                  {new Date(user.dob).toLocaleDateString("en-US")}
+                </p>
+                <p>
+                  {user.city}, {user.state}
+                </p>
+              </div>
+              <div className="user-actions">
+                <button
+                  className="edit-btn"
+                  onClick={() => handleEdit(user._id)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="delete-btn"
+                  onClick={() => handleDelete(user._id)}
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
