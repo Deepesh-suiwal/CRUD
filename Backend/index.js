@@ -7,7 +7,7 @@ import "dotenv/config";
 const app = express();
 connectDb();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 80;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
 const corsOptions = {
@@ -19,6 +19,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+app.get("/", async (req, res) => {
+  res.send("Your server is live on aws");
+});
 app.get("/api/users", async (req, res) => {
   try {
     const users = await Studentdata.find();
